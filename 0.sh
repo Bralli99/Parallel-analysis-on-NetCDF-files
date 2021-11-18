@@ -5,4 +5,4 @@
 # imposta la coda di esecuzione
 #PBS -q short_cpuQ
 module load hdf5-1.10.5--gcc-9.1.0 netcdf-4.7.0--gcc-9.1.0
-/home/alessiojuan.depaoli/Project/read
+/home/brando.chiminelli/exercises/Project/read

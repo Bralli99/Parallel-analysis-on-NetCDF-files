@@ -42,13 +42,13 @@
     /* Program variables to hold the data we will read. We will only
        need enough space to hold one timestep of data; one record. */
     float temp_in[NLAT][NLON];
+    float temp_out[NLAT][NLON];
   
     /* These program variables hold the latitudes and longitudes. */
     float lats[NLAT], lons[NLON];
   
     /* Loop indexes. */
-    int k, i, rec, conta, t;
-    float somma[51201];
+    int k, i, lg, ln, rec;
     
     /* Error handling. */
     int retval;
@@ -93,21 +93,23 @@
                        count, &temp_in[0][0])))
       ERR(retval);  
       //printf("Temp in 0,0 = %f\n", temp_in[0][0]);
-      conta = 0;
 
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
         {
-            somma[conta] = somma[conta] + temp_in[i][k];
-            conta++;
+            temp_out[i][k] = temp_out[i][k] + temp_in[i][k];
         }
       }
     } /* next record */
-    for(t = 0; t < 51200 ; t++)
+    
+    for(ln = 0; ln < 160; ln++)
+      {
+        for(lg = 0; lg < 320 ; lg++)
         {
-           printf("%f\n", somma[t]/365);
+           printf("%f\n", temp_out[ln][lg]/365);
         }
+      }
 
     /* Close the file. */
     if ((retval = nc_close(ncid)))
