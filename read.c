@@ -14,7 +14,7 @@
  #define NLON 320
  #define LAT_NAME "lat"
  #define LON_NAME "lon"
- #define NREC 1
+ #define NREC 365
  #define REC_NAME "time"
   
  /* Names of things. */
@@ -79,12 +79,11 @@
      * that the data arrays in this program are the correct size to
      * hold one timestep. */
     count[0] = 1;
-    count[1] = 1;
-    count[2] = NLAT;
-    count[3] = NLON;
+    count[1] = NLAT;
+    count[2] = NLON;
+    
     start[1] = 0;
     start[2] = 0;
-    start[3] = 0;
   
     /* Read and check one record at a time. */
     for (rec = 0; rec < NREC; rec++)
@@ -95,19 +94,19 @@
       ERR(retval);  
       //printf("Temp in 0,0 = %f\n", temp_in[0][0]);
       conta = 0;
+
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
         {
             somma[conta] = somma[conta] + temp_in[i][k];
             conta++;
-           printf("%f\n", temp_in[i][k]);
         }
       }
     } /* next record */
     for(t = 0; t < 51200 ; t++)
         {
-          // printf("%f\n", somma[t]/365);
+           printf("%f\n", somma[t]/365);
         }
 
     /* Close the file. */
