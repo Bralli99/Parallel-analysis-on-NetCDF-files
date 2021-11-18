@@ -14,7 +14,7 @@
  #define NLON 320
  #define LAT_NAME "lat"
  #define LON_NAME "lon"
- #define NREC 365
+ #define NREC 1
  #define REC_NAME "time"
   
  /* Names of things. */
@@ -47,8 +47,8 @@
     float lats[NLAT], lons[NLON];
   
     /* Loop indexes. */
-    int k, i, rec, conta = 0, t;
-    float somma[51200];
+    int k, i, rec, conta, t;
+    float somma[51201];
     
     /* Error handling. */
     int retval;
@@ -94,18 +94,20 @@
                        count, &temp_in[0][0])))
       ERR(retval);  
       //printf("Temp in 0,0 = %f\n", temp_in[0][0]);
+      conta = 0;
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
         {
             somma[conta] = somma[conta] + temp_in[i][k];
             conta++;
+           printf("%f\n", temp_in[i][k]);
         }
       }
     } /* next record */
     for(t = 0; t < 51200 ; t++)
         {
-           printf("%f\n", somma[t]/365);
+          // printf("%f\n", somma[t]/365);
         }
 
     /* Close the file. */
