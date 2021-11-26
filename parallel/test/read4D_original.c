@@ -9,13 +9,10 @@
    temperatures. The data file read by this program is produced by the
    companion program pres_temp_4D_wr.c. It is intended to illustrate
    the use of the netCDF C API.
-
    This program is part of the netCDF tutorial:
    http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-tutorial
-
    Full documentation of the netCDF C API can be found at:
    http://www.unidata.ucar.edu/software/netcdf/docs/netcdf-c
-
    $Id$
 */
 
@@ -33,22 +30,32 @@
 /* We are reading 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
    timesteps of data. */
 #define NDIMS 4
-#define NLAT 160
-#define NLON 320
-#define LAT_NAME "lat"
-#define LON_NAME "lon"
-#define NREC 365
+#define NLAT 6
+#define NLON 12
+#define LAT_NAME "latitude"
+#define LON_NAME "longitude"
+#define NREC 2
 #define REC_NAME "time"
+#define LVL_NAME "level"
+#define NLVL 10
 
 /* Names of things. */
-#define TEMP_NAME "tasmin"
+#define PRES_NAME "pressure"
+#define TEMP_NAME "temperature"
 #define UNITS "units"
 #define DEGREES_EAST "degrees_east"
 #define DEGREES_NORTH "degrees_north"
 
+/* These are used to calculate the values we expect to find. */
+#define SAMPLE_PRESSURE 900.0
+#define SAMPLE_TEMP 9.0
+#define START_LAT 25.0
+#define START_LON -125.0
+
 /* For the units attributes. */
 #define UNITS "units"
-#define TEMP_UNITS "kelvin"
+#define PRES_UNITS "hPa"
+#define TEMP_UNITS "celsius"
 #define LAT_UNITS "degrees_north"
 #define LON_UNITS "degrees_east"
 #define MAX_ATT_LEN 80
@@ -64,14 +71,14 @@ int main(int argc, char **argv)
 
     /* Program variables to hold the data we will read. We will only
       need enough space to hold one timestep of data; one record. */
-    float **temp_in = NULL; /* [NREC/nprocs][NLAT][NLON] */
-    float **temp_out = NULL;
+    float **pres_in = NULL; /* [NLVL/nprocs][NLAT][NLON] */
+    float **temp_in = NULL; /* [NLVL/nprocs][NLAT][NLON] */
 
     /* These program variables hold the latitudes and longitudes. */
     float lats[NLAT], lons[NLON];
 
     /* Loop indexes. */
-    int lvl, lat, lon, rec, i = 0, k = 0;
+    int lvl, lat, lon, rec, i = 0;
 
     /* Error handling. */
     int err, nerrs = 0;
@@ -82,20 +89,20 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    /*if (argc > 3) {
+    if (argc > 3) {
         if (!rank)
             printf("Usage: %s [filename]\n", argv[0]);
         MPI_Finalize();
         return 1;
     }
 
-    if (argc > 1) filename = argv[1];*/
+    if (argc > 1) filename = argv[1];
 
     /* Open the file. */
     err = ncmpi_open(MPI_COMM_WORLD, filename, NC_NOWRITE, MPI_INFO_NULL, &ncid);
     CHECK_ERR
 
-    /*if (rank == 0) {
+    if (rank == 0) {
         char *cmd_str = (char *)malloc(strlen(argv[0]) + 256);
         int format;
         err = ncmpi_inq_format(ncid, &format); CHECK_ERR
@@ -105,7 +112,7 @@ int main(int argc, char **argv)
             sprintf(cmd_str, "*** TESTING C   %s for reading classic file", basename(argv[0]));
         printf("%-66s ------ ", cmd_str);
         free(cmd_str);
-    }*/
+    }
 
     /* Get the varids of the latitude and longitude coordinate variables. */
     err = ncmpi_inq_varid(ncid, LAT_NAME, &lat_varid);
@@ -121,8 +128,26 @@ int main(int argc, char **argv)
     err = ncmpi_get_var_float_all(ncid, lon_varid, &lons[0]);
     CHECK_ERR
 
+    /* Check the coordinate variable data. */
+    for (lat = 0; lat < NLAT; lat++)
+        if (lats[lat] != START_LAT + 5. * lat) {
+            printf("\nError at line %d in %s: expect %e but got %e\n",
+            __LINE__, __FILE__, START_LAT + 5. * lat, lats[lat]);
+            nerrs++;
+            goto fn_exit;
+        }
+    for (lon = 0; lon < NLON; lon++)
+        if (lons[lon] != START_LON + 5. * lon) {
+            printf("\nError at line %d in %s: expect %e but got %e\n",
+            __LINE__, __FILE__, START_LON + 5. * lon, lons[lon]);
+            nerrs++;
+            goto fn_exit;
+        }
+
     /* Get the varids of the pressure and temperature netCDF
     * variables. */
+    err = ncmpi_inq_varid(ncid, PRES_NAME, &pres_varid);
+    CHECK_ERR
     err = ncmpi_inq_varid(ncid, TEMP_NAME, &temp_varid);
     CHECK_ERR
 
@@ -136,23 +161,26 @@ int main(int argc, char **argv)
     start[3] = 0;
 
     /* divide NLVL dimension among processes */
-    count[1] = NREC / nprocs; //365/nprocs = 5 (con 73 processi)
+    count[1] = NLVL / nprocs;
     start[1] = count[1] * rank;
-    if (rank < NREC % nprocs) {
+    if (rank < NLVL % nprocs) {
         start[1] += rank;
         count[1]++;
     }
     else {
-        start[1] += NREC % nprocs;
+        start[1] += NLVL % nprocs;
     }
     if (count[1] == 0)
         start[1] = 0;
 
     /* allocate read buffers */
-    temp_in = (float **)malloc(count[1] * 365 * sizeof(float *));
+    pres_in = (float **)malloc(count[1] * 2 * sizeof(float *));
+    temp_in = pres_in + count[1];
     if (count[1] > 0) {
-        temp_in[0] = (float *)malloc(count[1] * 365 * NLAT * NLON * sizeof(float));
+        pres_in[0] = (float *)malloc(count[1] * 2 * NLAT * NLON * sizeof(float));
+        temp_in[0] = pres_in[0] + count[1] * NLAT * NLON;
         for (i = 1; i < count[1]; i++) {
+            pres_in[i] = pres_in[i - 1] + NLAT * NLON;
             temp_in[i] = temp_in[i - 1] + NLAT * NLON;
         }
     }
@@ -160,16 +188,31 @@ int main(int argc, char **argv)
     /* Read and check one record at a time. */
     for (rec = 0; rec < NREC; rec++) {
         start[0] = rec;
+        err = ncmpi_get_vara_float_all(ncid, pres_varid, start, count, &pres_in[0][0]);
+        CHECK_ERR
         err = ncmpi_get_vara_float_all(ncid, temp_varid, start, count, &temp_in[0][0]);
-        CHECK_ERR        
+        CHECK_ERR
 
-        for(i = 0; i < 160; i++)
-        {
-            for(k = 0; k < 320 ; k++)
-            {
-            temp_out[i][k] = temp_out[i][k] + temp_in[i][k];
+        /* Check the data. */
+        i = (int)start[1] * NLAT * NLON;
+        for (lvl = 0; lvl < count[1]; lvl++)
+        for (lat = 0; lat < NLAT; lat++)
+        for (lon = 0; lon < NLON; lon++) {
+            if (pres_in[lvl][lat * NLON + lon] != SAMPLE_PRESSURE + i) {
+                printf("\nError at line %d in %s: expect %e but got %e\n",
+                __LINE__, __FILE__, SAMPLE_PRESSURE + i, pres_in[lvl][lat * NLON + lon]);
+                nerrs++;
+                goto fn_exit;
             }
+            if (temp_in[lvl][lat * NLON + lon] != SAMPLE_TEMP + i) {
+                printf("\nError at line %d in %s: expect %e but got %e\n",
+                __LINE__, __FILE__, SAMPLE_TEMP + i, temp_in[lvl][lat * NLON + lon]);
+                nerrs++;
+                goto fn_exit;
+            }
+            i++;
         }
+
     } /* next record */
 
 fn_exit:

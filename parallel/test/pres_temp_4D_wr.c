@@ -25,10 +25,10 @@
 #include <libgen.h> /* basename() */
 #include <pnetcdf.h>
 #include <mpi.h>
-#include </home/brando.chiminelli/exercises/PnetCDF/test/testutils.h>
+#include </home/brando.chiminelli/exercises/Project/parallel/test/testutils.h>
 
 /* This is the name of the data file we will create. */
-#define FILE_NAME "/home/brando.chiminelli/exercises/PnetCDF/test/pres_temp_4D.nc"
+#define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel/test/pres_temp_4D.nc"
 
 /* We are writing 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
    timesteps of data. */
