@@ -8,7 +8,7 @@
  #define FILE_NAME_R "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/alessiojuan.depaoli/Project/average.nc"
+ #define FILE_NAME "/home/brando.chiminelli/exercises/Project/serial/average.nc"
   
  /* We are reading 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
     timesteps of data. */

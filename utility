@@ -2,10 +2,11 @@ moduli
 module load hdf5-1.10.5--gcc-9.1.0 netcdf-4.7.0--gcc-9.1.0
 
 
-ncdump /home/alessiojuan.depaoli/Project/average.nc > text
+ncdump /home/brando.chiminelli/exercises/Project/serial/average.nc > text
 
 ncdump /home/brando.chiminelli/exercises/PnetCDF/test/pres_temp_4D.nc > text
 
 gcc -g -o simple_xy_rd simple_xy_rd.c -I/apps/netCDF4.7.0/include -L/apps/netCDF4.7.0/lib -lnetcdf -lm -ldl -lz -lcurl
+gcc -g -o read read.c -I/apps/netCDF4.7.0/include -L/apps/netCDF4.7.0/lib -lnetcdf -lm -ldl -lz -lcurl
 
-mpicc -g -Wall -o pres_temp_4D_wr pres_temp_4D_wr.c -I/apps/netCDF4.7.0/include -I/home/brando.chiminelli/exercises/PnetCDF/PnetCDF/include -L/apps/netCDF4.7.0/lib -L/home/brando.chiminelli/exercises/PnetCDF/PnetCDF/lib -lnetcdf -lpnetcdf -lm -ldl -lz -lcurl
+mpicc -g -Wall -o pres_temp_4D_rd pres_temp_4D_rd.c -I/apps/netCDF4.7.0/include -I/home/brando.chiminelli/exercises/PnetCDF/PnetCDF/include -L/apps/netCDF4.7.0/lib -L/home/brando.chiminelli/exercises/PnetCDF/PnetCDF/lib -lnetcdf -lpnetcdf -lm -ldl -lz -lcurl
