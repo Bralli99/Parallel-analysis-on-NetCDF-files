@@ -4,5 +4,5 @@
 #PBS -l walltime=0:02:00
 # imposta la coda di esecuzione
 #PBS -q short_cpuQ
-module load mpich-3.2 hdf5-1.10.5--gcc-9.1.0 netcdf-4.7.0--gcc-9.1.0
+module load mpich-3.2
 mpirun.actual -n 4 /home/brando.chiminelli/exercises/Project/parallel/test/pnetcdf_tasmin3D_rd

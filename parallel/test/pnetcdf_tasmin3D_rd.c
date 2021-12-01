@@ -28,7 +28,7 @@
 #include </home/brando.chiminelli/exercises/Project/parallel/test/testutils.h>
 
 /* This is the name of the data file we will read. */
-#define FILE_NAME "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
+#define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel/test/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
 
 /* We are reading 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
    timesteps of data. */
@@ -52,6 +52,11 @@
 #define LAT_UNITS "degrees_north"
 #define LON_UNITS "degrees_east"
 #define MAX_ATT_LEN 80
+
+//#define PASS_STR "pass\n"
+//#define FAIL_STR "fail with %d mismatches\n"
+//#define ERR {if(err!=NC_NOERR){printf("Error at %s:%d : %s\n", __FILE__,__LINE__, ncmpi_strerror(err));nerrs++;}}
+
 
 int main(int argc, char **argv)
 {

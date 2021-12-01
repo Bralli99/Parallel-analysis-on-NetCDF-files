@@ -1,0 +1,34 @@
+Error at pnetcdf_tasmin3D_rd.c:89 : NetCDF: Attempt to use feature that was not turned on when netCDF was built.
+Error at pnetcdf_tasmin3D_rd.c:89 : NetCDF: Attempt to use feature that was not turned on when netCDF was built.
+Error at pnetcdf_tasmin3D_rd.c:106 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:108 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:114 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:116 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:121 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:106 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:108 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:114 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:155 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:116 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:121 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:155 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:159 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:159 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:89 : NetCDF: Attempt to use feature that was not turned on when netCDF was built.
+Error at pnetcdf_tasmin3D_rd.c:94 : NetCDF: Not a valid ID
+*** TESTING C   pnetcdf_tasmin3D_rd for reading classic file       ------ Error at pnetcdf_tasmin3D_rd.c:106 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:108 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:114 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:116 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:121 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:155 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:159 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:89 : NetCDF: Attempt to use feature that was not turned on when netCDF was built.
+Error at pnetcdf_tasmin3D_rd.c:106 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:108 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:114 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:116 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:121 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:155 : NetCDF: Not a valid ID
+Error at pnetcdf_tasmin3D_rd.c:159 : NetCDF: Not a valid ID
+fail with 33 mismatches

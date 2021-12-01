@@ -3,6 +3,7 @@
  #include <stdio.h>
  #include <string.h>
  #include <netcdf.h>
+ 
   
  /* This is the name of the data file we will read. */
  #define FILE_NAME_R "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
