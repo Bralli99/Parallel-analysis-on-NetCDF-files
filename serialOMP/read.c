@@ -141,7 +141,7 @@
       start[0]++;
       //printf("Temp in 0,0 = %f\n", temp_in[0][0]);
 
-      //#pragma omp parallel for num_threads(80)
+      #pragma omp parallel for num_threads(5)
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
@@ -169,7 +169,7 @@
       struct timeval then;
       gettimeofday(&then, NULL);
       printf("Time: %lf\n", time_diff(now, then));
-   }
+   
 
    /* Create the file. */
     if ((retval = nc_create(FILE_NAME, NC_CLOBBER, &ncid)))
@@ -260,7 +260,8 @@
    /* Close the file. */
     if ((retval = nc_close(ncid)))
        ERR(retval);
-
+   }
+   
    MPI_Finalize();
    return 0;
  }

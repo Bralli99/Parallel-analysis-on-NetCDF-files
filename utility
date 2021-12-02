@@ -11,4 +11,4 @@ gcc -g -o read read.c -I/apps/netCDF4.7.0/include -L/apps/netCDF4.7.0/lib -lnetc
 
 mpicc -g -Wall -o pres_temp_4D_rd pres_temp_4D_rd.c -I/apps/netCDF4.7.0/include -I/home/brando.chiminelli/exercises/PnetCDF/PnetCDF/include -L/apps/netCDF4.7.0/lib -L/home/brando.chiminelli/exercises/PnetCDF/PnetCDF/lib -lnetcdf -lpnetcdf -lm -ldl -lz -lcurl
 mpicc -g -Wall -o read read.c -I/apps/netCDF4.7.0--gcc-9.1.0/include -I/apps/hdf5-1.10.5--gcc-9.1.0/include -L/apps/netCDF4.7.0--gcc-9.1.0/lib -L/apps/hdf5-1.10.5--gcc-9.1.0/lib -lnetcdf -lm -ldl -lz -lcurl -lhdf5 -lhdf5_hl
-mpicc -g -Wall -o read read.c -I/apps/netCDF4.7.0--gcc-9.1.0/include -I/apps/hdf5-1.10.5--gcc-9.1.0/include -L/apps/netCDF4.7.0--gcc-9.1.0/lib -L/apps/hdf5-1.10.5--gcc-9.1.0/lib -lnetcdf -lm -ldl -lz -lcurl -lhdf5 -lhdf5_hl
+mpicc -g -Wall -fopenmp -o read read.c -I/apps/netCDF4.7.0--gcc-9.1.0/include -I/apps/hdf5-1.10.5--gcc-9.1.0/include -L/apps/netCDF4.7.0--gcc-9.1.0/lib -L/apps/hdf5-1.10.5--gcc-9.1.0/lib -lnetcdf -lm -ldl -lz -lcurl -lhdf5 -lhdf5_hl
