@@ -6,12 +6,14 @@
  #include <mpi.h>
  #include <omp.h>
  #include <sys/time.h>
-  
+
+ 
  /* This is the name of the data file we will read. */
+
  #define FILE_NAME_R "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/brando.chiminelli/exercises/Project/serialOMP/average.nc"
+ #define FILE_NAME "/home/alessiojuan.depaoli/Project/2years/average.nc"
   
  /* We are reading 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
     timesteps of data. */
@@ -20,7 +22,6 @@
  #define NLON 320
  #define LAT_NAME "lat"
  #define LON_NAME "lon"
- #define NREC 365
  #define REC_NAME "time"
   
  /* Names of things. */
@@ -47,7 +48,43 @@
 
  int
  main(int argc, char **argv)
- {
+
+ { 
+    
+    int nyears = 2;
+    int NREC = 365 * nyears;
+    char x[] = "2057";
+    char str[100];
+   
+    strcpy(str, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
+    strcat(str, x);
+    strcat(str, "0101-");
+    strcat(str, x);
+    strcat(str, "1231.nc");
+
+    char x2[] = "2058";
+    char str2[100];
+   
+    strcpy(str2, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
+    strcat(str2, x2);
+    strcat(str2, "0101-");
+    strcat(str2, x2);
+    strcat(str2, "1231.nc");
+    
+    const char *filenames[10]; 
+    int r;
+
+    for (r = 0; r < 10; r++)
+    { 
+       if (r<5) {
+         filenames[r] = str;
+       } else {
+          filenames[r] = str2;
+       }
+   }
+    
+    //printf(str);
+
      /* IDs for the netCDF file, dimensions, and variables. */
     int ncid, lon_dimid, lat_dimid, rec_dimid;
     int lat_varid, lon_varid, temp_varid;
@@ -86,9 +123,9 @@
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   
     /* Open the file. */
-    if ((retval = nc_open(FILE_NAME_R, NC_NOWRITE, &ncid_r)))
+    if ((retval = nc_open(filenames[rank], NC_NOWRITE, &ncid_r)))
        ERR(retval);
-  
+   
     /* Get the varids of the latitude and longitude coordinate
      * variables. */
     if ((retval = nc_inq_varid(ncid_r, LAT_NAME, &lat_varid_r)))
@@ -115,11 +152,13 @@
     start[1] = 0;
     start[2] = 0;
 
+
+
     /* set count and start to work on a subset of NREC on each procs */
     count[0] = NREC / nprocs; //365/nprocs = 5 (with 73 procs)
-    start[0] = count[0] * rank;
-    if (rank < NREC % nprocs) {
-        start[0] += rank;
+    start[0] = count[0] * rank%5;
+    if (rank%5 < NREC % nprocs) {
+        start[0] += rank%5;
         count[0]++;
     }
     else {
@@ -131,17 +170,17 @@
     count[0]=1;  
     /* Read and check one record at a time. */
     
-    //#pragma omp parallel for num_threads(99)
+    
     for (rec = 0; rec < NREC / nprocs; rec++)
     {
-       //printf("proccess %d\n", rank);
+      
        if ((retval = nc_get_vara_float(ncid_r, temp_varid_r, start,
                        count, &temp_in[0][0])))
       ERR(retval);
       start[0]++;
-      //printf("Temp in 0,0 = %f\n", temp_in[0][0]);
+      
 
-      #pragma omp parallel for num_threads(5)
+      #pragma omp parallel for num_threads(4)
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
@@ -154,10 +193,11 @@
    if ((retval = nc_close(ncid_r)))
    ERR(retval);
 
-   MPI_Reduce(&temp_out, &temp_sum, 51200, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+   MPI_Reduce(&temp_out, &temp_sum, 51200 * nyears , MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
 
    if(rank==0){
-    //#pragma omp parallel for num_threads(80)
+
+    #pragma omp parallel for num_threads(4)
     for(ln = 0; ln < 160; ln++)
       {
         for(lg = 0; lg < 320 ; lg++)
