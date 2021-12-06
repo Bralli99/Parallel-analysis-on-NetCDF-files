@@ -125,6 +125,7 @@
     /* Open the file. */
     if ((retval = nc_open(filenames[rank], NC_NOWRITE, &ncid_r)))
        ERR(retval);
+    
    
     /* Get the varids of the latitude and longitude coordinate
      * variables. */
@@ -152,13 +153,11 @@
     start[1] = 0;
     start[2] = 0;
 
-
-
     /* set count and start to work on a subset of NREC on each procs */
     count[0] = NREC / nprocs; //365/nprocs = 5 (with 73 procs)
-    start[0] = count[0] * rank%5;
-    if (rank%5 < NREC % nprocs) {
-        start[0] += rank%5;
+    start[0] = count[0] * (rank%5);
+    if (rank % 5 < NREC % nprocs) {
+        start[0] += (rank%5);
         count[0]++;
     }
     else {
@@ -179,33 +178,47 @@
       ERR(retval);
       start[0]++;
       
+      
 
-      #pragma omp parallel for num_threads(4)
+      //#pragma omp parallel for num_threads(4)
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
         {
             temp_out[i][k] = temp_out[i][k] + temp_in[i][k];
+            
         }
       }
     } /* next day */
+    //printf("%f \n", temp_out[0][0]);
    
    if ((retval = nc_close(ncid_r)))
    ERR(retval);
 
-   MPI_Reduce(&temp_out, &temp_sum, 51200 * nyears , MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+   MPI_Reduce(&temp_out, &temp_sum, 51200 , MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+   //printf("temp_sum= %f \n", temp_sum[0][0]);
 
    if(rank==0){
 
-    #pragma omp parallel for num_threads(4)
+    //#pragma omp parallel for num_threads(4)
     for(ln = 0; ln < 160; ln++)
       {
         for(lg = 0; lg < 320 ; lg++)
         {
-           temp_sum[ln][lg] = temp_sum[ln][lg]/365;
-           //printf("temp_sum= %f \n", temp_sum[ln][lg]);
+           temp_sum[ln][lg] = temp_sum[ln][lg]/ (365*nyears) ;
+           printf("temp_sum= %f \n", temp_sum[ln][lg]);
+
+           if (temp_sum[ln][lg] < 1){
+              printf("%u ", ln);
+               printf("%u \n", lg);
+
+           }
+         
         }
       }
+   //printf("temp_sum= %f \n", temp_sum[0][0]);
+
       struct timeval then;
       gettimeofday(&then, NULL);
       printf("Time: %lf\n", time_diff(now, then));

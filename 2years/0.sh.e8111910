@@ -1,4 +1,0 @@
-Assertion failed in file src/mpi/coll/helper_fns.c at line 84: FALSE
-memcpy argument memory ranges overlap, dst_=0x7fffe75b6750 src_=0x7fffe75e8750 len_=409600
-
-internal ABORT - process 0
