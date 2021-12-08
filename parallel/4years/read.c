@@ -6,7 +6,7 @@
  #include <sys/time.h>
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel/5years/average_5years.nc"
+ #define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel/4years/average_4years.nc"
  #define NDIMS 3
  #define NLAT 160
  #define NLON 320
@@ -29,7 +29,7 @@
  int main(int argc, char *argv[])
 
  { 
-    int nyears = 5;
+    int nyears = 4;
     int NREC = 365 * nyears;
 
     char str[100];
@@ -60,13 +60,6 @@
     strcat(str4, "0101-");
     strcat(str4, argv[4]);
     strcat(str4, "1231.nc");
-
-    char str5[100];
-    strcpy(str5, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
-    strcat(str5, argv[5]);
-    strcat(str5, "0101-");
-    strcat(str5, argv[5]);
-    strcat(str5, "1231.nc");
 
     /* IDs for the netCDF file, dimensions, and variables. */
     int ncid, lon_dimid, lat_dimid, rec_dimid;
@@ -113,22 +106,21 @@
 
     for (r = 0; r < nprocs; r++)
     {
-       if (r<(poolprocs)) {
+       if ((r % 4) == 0) {
          filenames[r] = str;
        }
-       if (r<(poolprocs*2)) {
+       if ((r % 4) == 1) {
          filenames[r] = str2;
-       } 
-       if (r<(poolprocs*3)) {
-         filenames[r] = str3;
-       } 
-       if (r<(poolprocs*4)) {
-         filenames[r] = str4;
-       }  
-       else {
-          filenames[r] = str5;
        }
+       if ((r % 4) == 2) {
+         filenames[r] = str3;
+       }
+       if ((r % 4) == 3) {
+         filenames[r] = str4;
+       }     
    }
+
+
     /* Open the file. */
     if ((retval = nc_open(filenames[rank], NC_NOWRITE, &ncid_r)))
        ERR(retval);
