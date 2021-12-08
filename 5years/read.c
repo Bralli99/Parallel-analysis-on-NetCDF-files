@@ -13,7 +13,7 @@
  #define FILE_NAME_R "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/alessiojuan.depaoli/Project/5years/average.nc"
+ #define FILE_NAME "/home/brando.chiminelli/exercises/Project/5years/average.nc"
   
  /* We are reading 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
     timesteps of data. */
@@ -205,7 +205,7 @@
       
       
 
-      //#pragma omp parallel for num_threads(4)
+      #pragma omp parallel for num_threads(4) private(i, k)
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
@@ -226,7 +226,7 @@
 
    if(rank==0){
 
-    //#pragma omp parallel for num_threads(4)
+    #pragma omp parallel for num_threads(4) private(ln, lg)
     for(ln = 0; ln < 160; ln++)
       {
         for(lg = 0; lg < 320 ; lg++)

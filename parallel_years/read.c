@@ -11,7 +11,7 @@
  #define FILE_NAME_R "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/alessiojuan.depaoli/Project/serialOMP/average.nc"
+ #define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel_years/average.nc"
   
  /* We are reading 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
     timesteps of data. */
@@ -43,6 +43,7 @@
  /* Handle errors by printing an error message and exiting with a
   * non-zero status. */
  #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); return 2;}
+
  double time_diff(struct timeval x , struct timeval y);
 
  int
@@ -131,17 +132,16 @@
     count[0]=1;  
     /* Read and check one record at a time. */
     
-    
     for (rec = 0; rec < NREC / nprocs; rec++)
     {
        //printf("proccess %d\n", rank);
        if ((retval = nc_get_vara_float(ncid_r, temp_varid_r, start,
                        count, &temp_in[0][0])))
-      ERR(retval);
-      start[0]++;
+       ERR(retval);
+       start[0]++;
       //printf("Temp in 0,0 = %f\n", temp_in[0][0]);
 
-      #pragma omp parallel for num_threads(5)
+      #pragma omp parallel for num_threads(4) private(i, k)
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
@@ -158,7 +158,7 @@
 
    if(rank==0){
 
-    #pragma omp parallel for num_threads(5)
+    #pragma omp parallel for num_threads(4) private(ln, lg)
     for(ln = 0; ln < 160; ln++)
       {
         for(lg = 0; lg < 320 ; lg++)
