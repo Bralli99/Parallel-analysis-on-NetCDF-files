@@ -3,13 +3,9 @@
  #include <stdio.h>
  #include <string.h>
  #include <netcdf.h>
- 
-  
- /* This is the name of the data file we will read. */
- #define FILE_NAME_R "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_20570101-20571231.nc"
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/alessiojuan.depaoli/Project/serial/1year/average.nc"
+ #define FILE_NAME "/home/alessiojuan.depaoli/Project/serial/2year/average.nc"
   
  /* We are reading 4D data, a 2 x 6 x 12 lvl-lat-lon grid, with 2
     timesteps of data. */
@@ -41,9 +37,8 @@
  /* Handle errors by printing an error message and exiting with a
   * non-zero status. */
  #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); return 2;}
-  
- int
- main()
+
+ main(int argc, char *argv[])
  {
      /* IDs for the netCDF file, dimensions, and variables. */
     int ncid, lon_dimid, lat_dimid, lvl_dimid, rec_dimid;
@@ -70,18 +65,35 @@
     
     /* Error handling. */
     int retval;
-  
+    int f;
+    int nyears=2;
+
     char str[100];
     strcpy(str, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
     strcat(str, argv[1]);
     strcat(str, "0101-");
     strcat(str, argv[1]);
     strcat(str, "1231.nc");
-   
-    /* Open the file. */
-    if ((retval = nc_open(FILE_NAME_R, NC_NOWRITE, &ncid_r)))
-       ERR(retval);
-  
+
+    char str2[100];
+    strcpy(str2, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
+    strcat(str2, argv[2]);
+    strcat(str2, "0101-");
+    strcat(str2, argv[2]);
+    strcat(str2, "1231.nc");
+
+   for (f = 0; f < nyears; f++)
+   {
+      if (f==0) {
+         /* Open first file. */
+         if ((retval = nc_open(str, NC_NOWRITE, &ncid_r)))
+             ERR(retval);
+      } else {
+         /* Open second file. */
+         if ((retval = nc_open(str2, NC_NOWRITE, &ncid_r)))
+            ERR(retval);
+      }
+
     /* Get the varids of the latitude and longitude coordinate
      * variables. */
     if ((retval = nc_inq_varid(ncid_r, LAT_NAME, &lat_varid_r)))
@@ -128,21 +140,22 @@
       }
     } /* next record */
     
-    for(ln = 0; ln < 160; ln++)
-      {
-        for(lg = 0; lg < 320 ; lg++)
-        {
-           temp_out[ln][lg] = temp_out[ln][lg]/365;
-        
-        }
-      }
-
     /* Close the file. */
     if ((retval = nc_close(ncid_r)))
        ERR(retval);
   
     printf("*** SUCCESS reading example file pres_temp_4D.nc!\n");
-
+      
+   }
+   
+   for(ln = 0; ln < 160; ln++)
+      {
+        for(lg = 0; lg < 320 ; lg++)
+        {
+           temp_out[ln][lg] = temp_out[ln][lg]/(365*nyears);
+        
+        }
+      }
 
    /* Create the file. */
     if ((retval = nc_create(FILE_NAME, NC_CLOBBER, &ncid)))
