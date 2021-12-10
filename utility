@@ -16,10 +16,6 @@ mpicc -g -Wall -fopenmp -o read read.c -I/apps/netCDF4.7.0--gcc-9.1.0/include -I
 
 TODO
 
--sistemare input 1year seriale
--sistemare 5years seriale -> 4years
--check genrale commenti e codice che sia uguale dappertutto 
-
--benchmark sulla tabella disegnata. una volta che abbiamo tutti i valori possiamo iniziare il confronto quindi calcolare efficiency and speedup
+-benchmark sulla tabella disegnata. una volta che abbiamo tutti i valori possiamo iniziare il confronto quindi calcolare efficiency and speedup 
 
 

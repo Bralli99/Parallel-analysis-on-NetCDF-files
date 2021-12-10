@@ -1,17 +1,16 @@
  #include <stdio.h>
  #include <string.h>
  #include <netcdf.h>
- #include <mpi.h>
- #include <omp.h>
  #include <sys/time.h>
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel/4years/average_4years.nc"
+ #define FILE_NAME "/home/alessiojuan.depaoli/Project/serial/4years/average.nc"
  #define NDIMS 3
  #define NLAT 160
  #define NLON 320
  #define LAT_NAME "lat"
  #define LON_NAME "lon"
+ #define NREC 365
  #define REC_NAME "time"
  #define TEMP_NAME "tasmin"
  #define UNITS "units"
@@ -26,11 +25,10 @@
  /* Handle errors by printing an error message and exiting with a non-zero status. */
  #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); return 2;}
 
- int main(int argc, char *argv[])
+ main(int argc, char *argv[])
+ {
 
- { 
-    int nyears = 4;
-    int NREC = 365 * nyears;
+    int nyears=4;
 
     char str[100];
     strcpy(str, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
@@ -45,7 +43,7 @@
     strcat(str2, "0101-");
     strcat(str2, argv[2]);
     strcat(str2, "1231.nc");
-    
+
     char str3[100];
     strcpy(str3, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
     strcat(str3, argv[3]);
@@ -53,18 +51,16 @@
     strcat(str3, argv[3]);
     strcat(str3, "1231.nc");
 
-
-    char str4[100]; 
+    char str4[100];
     strcpy(str4, "/shares/HPC4DataScience/indices/tasmin_day_EC-Earth3-Veg-LR_ssp585_r1i1p1f1_gr_");
     strcat(str4, argv[4]);
     strcat(str4, "0101-");
     strcat(str4, argv[4]);
     strcat(str4, "1231.nc");
 
-    /* IDs for the netCDF file, dimensions, and variables. */
-    int ncid, lon_dimid, lat_dimid, rec_dimid;
-    int lat_varid, lon_varid, temp_varid;
-    int record = 1;
+     /* IDs for the netCDF file, dimensions, and variables. */
+    int ncid, lon_dimid, lat_dimid, lvl_dimid, rec_dimid;
+    int lat_varid, lon_varid, pres_varid, temp_varid;
     int dimids[NDIMS];
 
     int ncid_r, temp_varid_r;
@@ -75,54 +71,40 @@
   
     float temp_in[NLAT][NLON];
     float temp_out[NLAT][NLON];
-    float temp_sum[NLAT][NLON];
   
     /* These program variables hold the latitudes and longitudes. */
     float lats[NLAT], lons[NLON];
   
     /* Loop indexes. */
-    int k, i, lg, ln, rec, r;
+    int k, i, lg, ln, rec, f;
     
     /* Error handling. */
     int retval;
-
-    //MPI define rank and nprocs
-    int rank, nprocs;
-
+   
     /* Get time now */
     struct timeval now;
     gettimeofday(&now, NULL);
 
-    /* Initialize MPI */
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    
-    /* Assign a single filename to a pool of procs */
-    const char *filenames[nprocs]; 
-    int poolprocs = nprocs/nyears;
-
-    for (r = 0; r < nprocs; r++)
-    {
-       if ((r % 4) == 0) {
-         filenames[r] = str;
-       }
-       if ((r % 4) == 1) {
-         filenames[r] = str2;
-       }
-       if ((r % 4) == 2) {
-         filenames[r] = str3;
-       }
-       if ((r % 4) == 3) {
-         filenames[r] = str4;
-       }     
-   }
-
-
-    /* Open the file. */
-    if ((retval = nc_open(filenames[rank], NC_NOWRITE, &ncid_r)))
-       ERR(retval);
-   
+for (f = 0; f < nyears; f++)
+   {
+      if (f==0) {
+         /* Open first file. */
+         if ((retval = nc_open(str, NC_NOWRITE, &ncid_r)))
+             ERR(retval);
+      } else if (f==1) {
+         /* Open second file. */
+         if ((retval = nc_open(str2, NC_NOWRITE, &ncid_r)))
+            ERR(retval);
+      } else if (f==2) {
+         /* Open third file. */
+         if ((retval = nc_open(str3, NC_NOWRITE, &ncid_r)))
+            ERR(retval);
+      } else {
+         /* Open fourth file. */
+         if ((retval = nc_open(str4, NC_NOWRITE, &ncid_r)))
+            ERR(retval);
+      }
+      
     /* Get the varids of the latitude and longitude coordinate variables. */
     if ((retval = nc_inq_varid(ncid_r, LAT_NAME, &lat_varid_r)))
        ERR(retval);
@@ -135,71 +117,50 @@
     if ((retval = nc_get_var_float(ncid_r, lon_varid_r, &lons[0])))
        ERR(retval);
   
-    /* Get the varid of tasmin (netCDF variable). */
+    /* Get the varids of the pressure and temperature netCDF variables. */
     if ((retval = nc_inq_varid(ncid_r, TEMP_NAME, &temp_varid_r)))
        ERR(retval);
   
-    /* Set count and start to work on a subset of NREC (days) on each procs */
+    /* Set count and start to work on a netCDF file */ 
+    count[0] = 1;
     count[1] = NLAT;
     count[2] = NLON;
     start[1] = 0;
     start[2] = 0;
-
-    count[0] = NREC / nprocs; 
-    start[0] = count[0] * (rank % poolprocs);
-    if (rank % poolprocs < NREC % nprocs) {
-        start[0] += (rank % poolprocs);
-        count[0]++;
-    }
-    else {
-        start[0] += NREC % nprocs;
-    }
-    if (count[0] == 0)
-        start[0] = 0;
-
-    /* Read and check one record at a time. */
-    count[0] = record;
-
-   /* Start reading from the netCDF file for a pool of days*/
-    for (rec = 0; rec < NREC / nprocs; rec++)
+  
+    /* Start reading from the netCDF file for a pool of days*/
+    for (rec = 0; rec < NREC; rec++)
     {
-      
-      /* Read a single day*/
-      if ((retval = nc_get_vara_float(ncid_r, temp_varid_r, start, count, &temp_in[0][0])))
-      ERR(retval);
-      start[0]++;
+       start[0] = rec;
+       /* Read a single day*/
+       if ((retval = nc_get_vara_float(ncid_r, temp_varid_r, start,
+                       count, &temp_in[0][0])))
+      ERR(retval);  
 
-      /* With OMP, sum the tasmin value */
-      #pragma omp parallel for num_threads(4) private(i, k)
+      /* sum the tasmin value */
       for(i = 0; i < 160; i++)
       {
         for(k = 0; k < 320 ; k++)
         {
             temp_out[i][k] = temp_out[i][k] + temp_in[i][k];
-            
         }
       }
     } /* next day */
-   
-   if ((retval = nc_close(ncid_r)))
-   ERR(retval);
-
-   /* Collect the different sums from each process on process 0 */
-   MPI_Reduce(&temp_out, &temp_sum, 51200 , MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-
-   if(rank==0){
-
-    /* With OMP, calculate the average on all the years */
-    #pragma omp parallel for num_threads(4) private(ln, lg)
-    for(ln = 0; ln < 160; ln++)
+    
+    /* Close the file. */
+    if ((retval = nc_close(ncid_r)))
+       ERR(retval);
+      
+   }
+   /* calculate the average on all the years */
+   for(ln = 0; ln < 160; ln++)
       {
         for(lg = 0; lg < 320 ; lg++)
         {
-           temp_sum[ln][lg] = temp_sum[ln][lg]/ (365*nyears) ;     
+           temp_out[ln][lg] = temp_out[ln][lg]/(365*nyears);
         }
       }
-
-    /* Get the time and print the performance */
+   /* Get the time and print the performance */
     struct timeval then;
     gettimeofday(&then, NULL);
     printf("Time: %ld\n", (then.tv_sec*1000000 + then.tv_usec) - (now.tv_sec*1000000 + now.tv_usec));
@@ -207,7 +168,7 @@
    /* Create the file. */
     if ((retval = nc_create(FILE_NAME, NC_CLOBBER, &ncid)))
        ERR(retval);
-
+  
     if ((retval = nc_def_dim(ncid, LAT_NAME, NLAT, &lat_dimid)))
        ERR(retval);
     if ((retval = nc_def_dim(ncid, LON_NAME, NLON, &lon_dimid)))
@@ -219,7 +180,7 @@
        ERR(retval);
     if ((retval = nc_def_var(ncid, LON_NAME, NC_FLOAT, 1, &lon_dimid, &lon_varid)))
        ERR(retval);
-
+  
     if ((retval = nc_put_att_text(ncid, lat_varid, UNITS, strlen(DEGREES_NORTH), DEGREES_NORTH)))
        ERR(retval);
     if ((retval = nc_put_att_text(ncid, lon_varid, UNITS, strlen(DEGREES_EAST), DEGREES_EAST)))
@@ -231,7 +192,6 @@
 
     if ((retval = nc_def_var(ncid, TEMP_NAME, NC_FLOAT, NDIMS, dimids, &temp_varid)))
        ERR(retval);
-
     if ((retval = nc_put_att_text(ncid, temp_varid, UNITS, strlen(TEMP_UNITS), TEMP_UNITS)))
        ERR(retval);
   
@@ -250,14 +210,16 @@
     start[1] = 0;
     start[2] = 0;
   
-   if ((retval = nc_put_vara_float(ncid, temp_varid, start, count, &temp_sum[0][0])))
+    if ((retval = nc_put_vara_float(ncid, temp_varid, start, count,
+                       &temp_out[0][0])))
       ERR(retval);
 
-   /* Close the file. */
+
+    /* Close the file. */
     if ((retval = nc_close(ncid)))
        ERR(retval);
-   }
-   
-   MPI_Finalize();
-   return 0;
+  
+    printf("*** SUCCESS writing file %s!\n", FILE_NAME);
+
+    return 0;
  }
