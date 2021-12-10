@@ -1,10 +1,9 @@
 moduli 
-module load hdf5-1.10.5--gcc-9.1.0 netcdf-4.7.0--gcc-9.1.0
+module load mpich-3.2 hdf5-1.10.5--gcc-9.1.0 netcdf-4.7.0--gcc-9.1.0
+
 
 
 ncdump /home/brando.chiminelli/exercises/Project/parallel/netcdf_par/average.nc > text
-
-ncdump /home/brando.chiminelli/exercises/PnetCDF/test/pres_temp_4D.nc > text
 
 gcc -g -o simple_xy_rd simple_xy_rd.c -I/apps/netCDF4.7.0/include -L/apps/netCDF4.7.0/lib -lnetcdf -lm -ldl -lz -lcurl
 gcc -g -o read read.c -I/apps/netCDF4.7.0/include -L/apps/netCDF4.7.0/lib -lnetcdf -lm -ldl -lz -lcurl
@@ -18,4 +17,13 @@ TODO
 
 -benchmark sulla tabella disegnata. una volta che abbiamo tutti i valori possiamo iniziare il confronto quindi calcolare efficiency and speedup 
 
+BRANDO 
+-design parallel solution(schema)
+-final conclusion + panoply 
+-grafici benchmark 
 
+ALESSIO
+-16nodi non funziona
+-benchmark sulla tabella disegnata. una volta che abbiamo tutti i valori possiamo iniziare il confronto quindi calcolare efficiency and speedup 
+-problem analysis
+-implementanzione main step 
