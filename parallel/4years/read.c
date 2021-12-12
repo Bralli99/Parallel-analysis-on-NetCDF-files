@@ -6,7 +6,7 @@
  #include <sys/time.h>
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/alessiojuan.depaoli/Project/parallel/4years/average_4years.nc"
+ #define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel/4years/average_4years.nc"
  #define NDIMS 3
  #define NLAT 160
  #define NLON 320
@@ -146,12 +146,12 @@
 
     count[0] = NREC / nprocs; 
     start[0] = count[0] * (rank % poolprocs);
-    if (rank % poolprocs < NREC % nprocs) {
+    if (rank % poolprocs <= 365 % poolprocs) {
         start[0] += (rank % poolprocs);
         count[0]++;
     }
     else {
-        start[0] += NREC % nprocs;
+        start[0] += 365 % poolprocs;
     }
     if (count[0] == 0)
         start[0] = 0;

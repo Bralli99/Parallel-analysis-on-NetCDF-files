@@ -123,12 +123,12 @@
 
     count[0] = NREC / nprocs;
     start[0] = count[0] * (rank % poolprocs);
-    if (rank % poolprocs < NREC % nprocs) {
+    if (rank % poolprocs <= 365 % poolprocs) {
         start[0] += (rank % poolprocs);
         count[0]++;
     }
     else {
-        start[0] += NREC % nprocs;
+        start[0] += 365 % poolprocs;
     }
     if (count[0] == 0)
         start[0] = 0;
