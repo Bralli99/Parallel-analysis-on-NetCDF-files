@@ -5,4 +5,4 @@
 # imposta la coda di esecuzione
 #PBS -q short_cpuQ
 module load mpich-3.2 hdf5-1.10.5--gcc-9.1.0 netcdf-4.7.0--gcc-9.1.0
-mpirun.actual -n 16 /home/brando.chiminelli/exercises/Project/parallel/2years/read 2057 2058
+mpirun.actual -n 16 /home/alessiojuan.depaoli/Project/parallel/2years/read 2057 2058

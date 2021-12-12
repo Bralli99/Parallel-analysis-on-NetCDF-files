@@ -6,7 +6,7 @@
  #include <sys/time.h>
 
  /* This is the name of the data file we will create. */
- #define FILE_NAME "/home/brando.chiminelli/exercises/Project/parallel/1year/average_1year.nc"
+ #define FILE_NAME "/home/alessiojuan.depaoli/Project/parallel/1year/average_1year.nc"
  #define NDIMS 3
  #define NLAT 160
  #define NLON 320
